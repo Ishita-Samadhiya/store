@@ -106,10 +106,11 @@ function addItem(){
     }
     var obj = getProduct(barcode.value);
     obj.quan = parseInt(quan.value); // Parse quantity as an integer
-
+    //find if obj alread an item or not
     var existingItem = items.find(item => item.name === obj.name);
 
     if (existingItem) {
+        //if exists, just update previous display
         existingItem.quan += obj.quan;
         updateDisplay(existingItem);
     } else {
@@ -135,6 +136,7 @@ function addItem(){
         reciept.appendChild(thing);
     }
     if(add === 0){
+        //create end display only first time
         tot = document.createElement("p");
         tot.innerText = "Total: $" + total;
         page.appendChild(tot);
@@ -167,9 +169,11 @@ function updateDisplay(existingItem) {
 var check = 0;
 function checkOut(){
     if(check === 0){
+        //only create 1st time
         finalTotal = document.createElement("p");
         page.appendChild(finalTotal);
     }
+    //update totals after 1st time
     finalTotal.innerText = "Your grand total (including tax, 9.25%) is $" + parseFloat(total * 1.0925).toFixed(2);
     check ++;
 }
