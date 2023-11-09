@@ -79,6 +79,7 @@ function getProduct(code) {
 //initialize add and total to create display details the first time and keep track of total
 var add = 0;
 var total = 0;
+var items = [];
 
 function addItem(){
     if(add === 0){//initial display(all titles)
@@ -103,20 +104,36 @@ function addItem(){
         reciept = document.createElement("div");
         page.appendChild(reciept);
     }
-    obj = getProduct(barcode.value);
-    total += obj.price * quan.value;
-    thing = document.createElement("div");
-    what = document.createElement("p");
-    howMuch = document.createElement("p");
-    quant = document.createElement("p");
-    what.innerText =obj.name;
-    howMuch.innerText = obj.price;
-    quant.innerText = quan.value;
-    thing.appendChild(what);
-    thing.appendChild(howMuch);
-    thing.appendChild(quant);
-    thing.classList.add("item");
-    reciept.appendChild(thing);
+    var obj = getProduct(barcode.value);
+    obj.quan = parseInt(quan.value); // Parse quantity as an integer
+
+    var existingItem = items.find(item => item.name === obj.name);
+
+    if (existingItem) {
+        existingItem.quan += obj.quan;
+        updateDisplay(existingItem);
+    } else {
+        // If the item doesn't exist, add it to the items array
+        items.push(obj);
+
+        // Create a new display entry (thing) only for new items
+        total += obj.price * obj.quan;
+
+        var thing = document.createElement("div");
+        var what = document.createElement("p");
+        var howMuch = document.createElement("p");
+        var quant = document.createElement("p");
+
+        what.innerText = obj.name;
+        howMuch.innerText = obj.price;
+        quant.innerText = obj.quan;
+
+        thing.appendChild(what);
+        thing.appendChild(howMuch);
+        thing.appendChild(quant);
+        thing.classList.add("item");
+        reciept.appendChild(thing);
+    }
     if(add === 0){
         tot = document.createElement("p");
         tot.innerText = "Total: $" + total;
@@ -126,15 +143,33 @@ function addItem(){
         page.appendChild(checkout);
         checkout.addEventListener("click", checkOut);
     }
-    tot.innerText = "Total: $" + total;
+    tot.innerText = "Total: $" + parseFloat(total).toFixed(2);
     add++;
     quan.value = "";
     barcode.value = "";
 }
 sub.addEventListener("click", addItem);
 
+function updateDisplay(existingItem) {
+    // Find the existing display for the item
+    var existingDisplay = document.querySelector(".item p:first-child");
+
+    // Find the correct item element for the existing item
+    var itemElement = Array.from(document.querySelectorAll(".item p:first-child")).find(p => p.innerText === existingItem.name);
+
+    if (itemElement) {
+        // Update the quantity in the existing display
+        itemElement.nextElementSibling.nextElementSibling.innerText = existingItem.quan;
+    }
+    // Update the total
+    total += existingItem.price * existingItem.quan;
+}
+var check = 0;
 function checkOut(){
-    finalTotal = document.createElement("p");
+    if(check === 0){
+        finalTotal = document.createElement("p");
+        page.appendChild(finalTotal);
+    }
     finalTotal.innerText = "Your grand total (including tax, 9.25%) is $" + parseFloat(total * 1.0925).toFixed(2);
-    page.appendChild(finalTotal);
+    check ++;
 }
